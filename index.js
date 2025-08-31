@@ -2,17 +2,22 @@ const express = require("express");
 const app = express();
 const port = 5000;
 require("dotenv").config();
-const mongoose = require("mongoose");
+const databaseConfig = require("./config/database.config");
 const path = require("path");
-const clientRoute = require("./routes/client/index.route");
+const clientRoutes = require("./routes/client/index.route");
+const adminRoutes = require("./routes/admin/index.route");
+const variableConfig = require("./config/variable.config");
+databaseConfig.connect();
 
-mongoose.connect(process.env.DATABASE);
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
+app.use(express.static(path.join(__dirname, "public")));
 
+app.locals.pathAdmin = variableConfig.pathAdmin;
 
-app.use("/", clientRoute);
+app.use(`/${variableConfig.pathAdmin}`, adminRoutes);
+app.use("/", clientRoutes);
 
 app.listen(port, () => {
-  console.log(`The programming is running port ${port}`);
+  console.log(`The programming is running at port ${port}`);
 });
