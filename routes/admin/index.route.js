@@ -8,18 +8,19 @@ const userRoutes = require("./user.route");
 const contactRoutes = require("./contact.route");
 const settingRoutes = require("./setting.route");
 const profileRoutes = require("./profile.route");
+const authMiddleware = require("../../middlewares/admin/auth.middleware");
 
 route.use("/account", accountRoutes);
-route.use("/dashboard", dashboardRoutes);
-route.use("/category", categoryRoutes);
-route.use("/tour", tourRoutes);
-route.use("/order", orderRoutes);
-route.use("/user", userRoutes);
-route.use("/contact", contactRoutes);
-route.use("/setting", settingRoutes);
-route.use("/profile", profileRoutes);
+route.use("/dashboard", authMiddleware.verifyToken, dashboardRoutes);
+route.use("/category", authMiddleware.verifyToken, categoryRoutes);
+route.use("/tour", authMiddleware.verifyToken, tourRoutes);
+route.use("/order", authMiddleware.verifyToken, orderRoutes);
+route.use("/user", authMiddleware.verifyToken, userRoutes);
+route.use("/contact", authMiddleware.verifyToken, contactRoutes);
+route.use("/setting", authMiddleware.verifyToken, settingRoutes);
+route.use("/profile", authMiddleware.verifyToken, profileRoutes);
 
-route.use((req, res) => {
+route.use(authMiddleware.verifyToken, (req, res) => {
   res.render("admin/pages/error-404", {
     pageTitle: "404 Not Found",
   });

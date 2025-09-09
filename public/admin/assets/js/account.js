@@ -28,6 +28,7 @@ if (loginForm) {
       const dataFinal = {
         email: email,
         password: password,
+        rememberPassword: rememberPassword,
       };
 
       fetch(`/${pathAdmin}/account/login`, {
@@ -166,7 +167,26 @@ if (forgotPasswordForm) {
     ])
     .onSuccess((event) => {
       const email = event.target.email.value;
-      console.log(email);
+      const dataFinal = {
+        email: email,
+      };
+
+      fetch(`/${pathAdmin}/account/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataFinal),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.href = `/${pathAdmin}/account/otp-password?email=${email}`;
+          } else {
+            notify.error(data.message);
+          }
+        });
     });
 }
 // End Forgot Password Form
@@ -185,7 +205,31 @@ if (otpPasswordForm) {
     ])
     .onSuccess((event) => {
       const otp = event.target.otp.value;
-      console.log(otp);
+
+      const urlParams = new URLSearchParams(location.search);
+      const email = urlParams.get("email");
+
+      const dataFinal = {
+        email: email,
+        otp: otp,
+      };
+
+      fetch(`/${pathAdmin}/account/otp-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataFinal),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.href = `/${pathAdmin}/account/reset-password`;
+          } else {
+            notify.error(data.message);
+          }
+        });
     });
 }
 // End OTP Password Form
@@ -237,7 +281,27 @@ if (resetPasswordForm) {
     ])
     .onSuccess((event) => {
       const password = event.target.password.value;
-      console.log(password);
+
+      const dataFinal = {
+        password: password,
+      };
+
+      fetch(`/${pathAdmin}/account/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataFinal),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.href = `/${pathAdmin}/dashboard`;
+          } else {
+            notify.error(data.message);
+          }
+        });
     });
 }
 // End Reset Password Form

@@ -625,3 +625,21 @@ if (sider) {
       item.classList.add("active");
   });
 }
+
+const buttonLogout = document.querySelector(".sider .inner-logout");
+if (buttonLogout) {
+  buttonLogout.addEventListener("click", () => {
+    fetch(`/${pathAdmin}/account/logout`, {
+      method: "POST",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code == "success") {
+          setNotificationInSession(data.code, data.message);
+          window.location.href = `/${pathAdmin}/account/login`;
+        } else {
+          notify.error(data.message);
+        }
+      });
+  });
+}
