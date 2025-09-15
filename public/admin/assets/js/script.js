@@ -164,12 +164,27 @@ if (categoryCreateForm) {
       }
       const description = tinymce.get("description").getContent();
 
-      console.log(name);
-      console.log(parent);
-      console.log(position);
-      console.log(status);
-      console.log(avatar);
-      console.log(description);
+      const dataFinal = new FormData();
+      dataFinal.append("name", name);
+      dataFinal.append("parent", parent);
+      dataFinal.append("position", position);
+      dataFinal.append("status", status);
+      dataFinal.append("avatar", avatar);
+      dataFinal.append("description", description);
+
+      fetch(`/${pathAdmin}/category/create`, {
+        method: "POST",
+        body: dataFinal,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
     });
 }
 // End Category Create Form
