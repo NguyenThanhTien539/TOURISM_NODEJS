@@ -1,20 +1,24 @@
 const { Category } = require("../../models/category.model");
-
+const categoryHelper = require("../../helpers/category.helper");
 module.exports.list = (req, res) => {
   res.render("admin/pages/category-list.pug", {
     pageTitle: "Quản lí danh mục",
   });
 };
 
-module.exports.create = (req, res) => {
+module.exports.create = async (req, res) => {
+  const categoryList = await Category.find({ deleted: false });
+  console.log(categoryList);
+
+  const categoryTree = categoryHelper.buildTree(categoryList, "");
+
   res.render("admin/pages/category-create.pug", {
     pageTitle: "Tạo danh mục",
+    categoryList: categoryTree,
   });
 };
 
 module.exports.createPost = async (req, res) => {
-  console.log(req.file);
-
   if (req.body.position) req.body.position = parseInt(req.body.position);
   else {
     const totalRecord = await Category.countDocuments({});
@@ -27,7 +31,6 @@ module.exports.createPost = async (req, res) => {
   const newRecord = new Category(req.body);
   await newRecord.save();
 
-  console.log(req.body);
   res.json({
     code: "success",
     message: "Tạo danh mục thành công",
