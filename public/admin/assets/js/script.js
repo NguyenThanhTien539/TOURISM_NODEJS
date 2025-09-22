@@ -85,8 +85,24 @@ if (listFilepondImage.length > 0) {
   listFilepondImage.forEach((filepondImage) => {
     FilePond.registerPlugin(FilePondPluginImagePreview);
     FilePond.registerPlugin(FilePondPluginFileValidateType);
+
+    let images = null;
+
+    const elementDefault = filepondImage.closest("[image-default]");
+    if (elementDefault) {
+      const imageDefault = elementDefault.getAttribute("image-default");
+      if (imageDefault) {
+        images = [
+          {
+            source: imageDefault,
+          },
+        ];
+      }
+    }
+
     filePond[filepondImage.name] = FilePond.create(filepondImage, {
       labelIdle: "+",
+      files: images,
     });
   });
 }
@@ -188,6 +204,67 @@ if (categoryCreateForm) {
     });
 }
 // End Category Create Form
+
+// Category Edit Form
+const categoryEditForm = document.querySelector("#category-edit-form");
+if (categoryEditForm) {
+  const validation = new JustValidate("#category-edit-form");
+
+  validation
+    .addField("#name", [
+      {
+        rule: "required",
+        errorMessage: "Vui lòng nhập tên danh mục!",
+      },
+    ])
+    .onSuccess((event) => {
+      const id = event.target.id.value;
+      const name = event.target.name.value;
+      const parent = event.target.parent.value;
+      const position = event.target.position.value;
+      const status = event.target.status.value;
+      const avatars = filePond.avatar.getFiles();
+      let avatar = null;
+      if (avatars.length > 0) {
+        avatar = avatars[0].file;
+
+        const elementImageDefault =
+          event.target.avatar.closest("[image-default]");
+
+        const imageDefault = elementImageDefault.getAttribute("image-default");
+        if (imageDefault.includes(avatar.name)) {
+          avatar = undefined;
+        }
+      }
+
+      const description = tinymce.get("description").getContent();
+
+      const dataFinal = new FormData();
+      dataFinal.append("name", name);
+      dataFinal.append("parent", parent);
+      dataFinal.append("position", position);
+      dataFinal.append("status", status);
+      dataFinal.append("avatar", avatar);
+      dataFinal.append("description", description);
+
+      console.log(name);
+
+      fetch(`/${pathAdmin}/category/edit/${id}`, {
+        method: "PATCH",
+        body: dataFinal,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
+    });
+}
+// End Category Edit Form
 
 // Tour Create Form
 const tourCreateForm = document.querySelector("#tour-create-form");
@@ -657,4 +734,202 @@ if (buttonLogout) {
         }
       });
   });
+}
+
+const listButtonDelete = document.querySelectorAll("[button-delete]");
+if (listButtonDelete) {
+  listButtonDelete.forEach((button) => {
+    button.addEventListener("click", () => {
+      const dataApi = button.getAttribute("data-api");
+      console.log(dataApi);
+      fetch(dataApi, {
+        method: "PATCH",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
+    });
+  });
+}
+
+// Filter status
+const filterStatus = document.querySelector("[filter-status]");
+if (filterStatus) {
+  const newURL = new URL(window.location.href);
+
+  filterStatus.addEventListener("change", () => {
+    const value = filterStatus.value;
+
+    if (value) {
+      newURL.searchParams.set("status", value);
+    } else {
+      newURL.searchParams.delete("status");
+    }
+
+    window.location.href = newURL;
+  });
+
+  const currentValue = newURL.searchParams.get("status");
+  if (currentValue) filterStatus.value = currentValue;
+}
+// End filter status
+
+// Filter created by
+const filterCreatedBy = document.querySelector("[filter-created-by]");
+if (filterCreatedBy) {
+  const newURL = new URL(window.location.href);
+
+  filterCreatedBy.addEventListener("change", () => {
+    const value = filterCreatedBy.value;
+
+    if (value) {
+      newURL.searchParams.set("createdBy", value);
+    } else {
+      newURL.searchParams.delete("createdBy");
+    }
+
+    window.location.href = newURL;
+  });
+
+  const currentValue = newURL.searchParams.get("createdBy");
+  if (currentValue) filterCreatedBy.value = currentValue;
+}
+// End filter created by
+
+// Filter start date
+const filterStartDate = document.querySelector("[filter-start-date]");
+if (filterStartDate) {
+  const newURL = new URL(window.location.href);
+
+  filterStartDate.addEventListener("change", () => {
+    const value = filterStartDate.value;
+
+    if (value) {
+      newURL.searchParams.set("startDate", value);
+    } else {
+      newURL.searchParams.delete("startDate");
+    }
+
+    window.location.href = newURL;
+  });
+
+  const currentValue = newURL.searchParams.get("startDate");
+  if (currentValue) filterStartDate.value = currentValue;
+}
+// End Filter start date
+
+// Filter end date
+const filterEndDate = document.querySelector("[filter-end-date]");
+if (filterEndDate) {
+  const newURL = new URL(window.location.href);
+
+  filterEndDate.addEventListener("change", () => {
+    const value = filterEndDate.value;
+
+    if (value) {
+      newURL.searchParams.set("endDate", value);
+    } else {
+      newURL.searchParams.delete("endDate");
+    }
+
+    window.location.href = newURL;
+  });
+
+  const currentValue = newURL.searchParams.get("endDate");
+  if (currentValue) filterEndDate.value = currentValue;
+}
+// End Filter end date
+
+//Delete all filter
+const deleteFilterButton = document.querySelector("[delete-filter-button]");
+if (deleteFilterButton) {
+  deleteFilterButton.addEventListener("click", () => {
+    const newURL = new URL(window.location.href);
+    newURL.search = "";
+    window.location.href = newURL.href;
+  });
+}
+//End delete all filter
+
+const checkAll = document.querySelector("[check-all]");
+if (checkAll) {
+  checkAll.addEventListener("click", () => {
+    const listCheckItems = document.querySelectorAll("[check-item]");
+    listCheckItems.forEach((item) => {
+      item.checked = checkAll.checked;
+    });
+  });
+}
+
+//change multi
+const changeMulti = document.querySelector("[change-multi]");
+if (changeMulti) {
+  const api = changeMulti.getAttribute("data-api");
+  const select = changeMulti.querySelector("select");
+  const button = changeMulti.querySelector("button");
+
+  if (button) {
+    button.addEventListener("click", () => {
+      const option = select.value;
+      const listInputChecked = document.querySelectorAll(
+        "[check-item]:checked"
+      );
+
+      if (option && listInputChecked.length > 0) {
+        const ids = [];
+        listInputChecked.forEach((input) => {
+          const id = input.getAttribute("check-item");
+          ids.push(id);
+        });
+
+        const dataFinal = {
+          option: option,
+          ids: ids,
+        };
+
+        fetch(api, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataFinal),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.code == "success") {
+              setNotificationInSession(data.code, data.message);
+              window.location.reload();
+            }
+          });
+      }
+    });
+  }
+}
+//end change multi
+
+const search = document.querySelector("[search]");
+if (search) {
+  const url = new URL(window.location.href);
+  search.addEventListener("keyup", (event) => {
+    if (event.code === "Enter") {
+      const value = search.value;
+      if (value) {
+        url.searchParams.set("keyword", value);
+      } else {
+        url.searchParams.delete("keyword");
+      }
+      window.location.href = url.href;
+    }
+  });
+
+  const value = url.searchParams.get("keyword");
+  if (value) {
+    search.value = value;
+  }
 }

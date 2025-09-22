@@ -2,32 +2,35 @@ extends ../layouts/default.pug
 include ../mixins/options.pug
 
 block main
-  h1.box-title Chỉnh sửa danh mục
+  h1.box-title Tạo danh mục
 
   .section-8
-    form#category-create-form
+    form#category-edit-form
+      .inner-group(style="display: none;")
+        label(class="inner-label" for="id") Id
+        input(type="text" id="id" name="id"  value=detailedCategory.id)
       .inner-group
         label(class="inner-label" for="name") Tên danh mục
-        input(type="text" id="name" name="name")
+        input(type="text" id="name" name="name"  value=detailedCategory.name)
       .inner-group
         label(class="inner-label" for="parent") Danh mục cha
         select(id="parent" name="parent")
           option(value="") -- Chọn danh mục --
-          +options(categoryList, 0, "")
+          +options(categoryList, 0, detailedCategory.parent)
       .inner-group
         label(class="inner-label" for="position") Vị trí
-        input(type="number" id="position" name="position")
+        input(type="number" id="position" name="position" value=detailedCategory.position) 
       .inner-group
         label(class="inner-label" for="status") Trạng thái
         select(id="status" name="status")
-          option(value="active") Hoạt động
-          option(value="inactive") Dừng hoạt động
+          option(value="active" selected=(detailedCategory.status == "active" ? true : false)) Hoạt động
+          option(value="inactive" selected=(detailedCategory.status == "inactive" ? true : false)) Dừng hoạt động
       .inner-group.inner-two-col
         label(class="inner-label" for="avatar") Ảnh đại diện
-        div(class="inner-upload-image")
+        div(class="inner-upload-image" image-default= detailedCategory.avatar)
           input(type="file" id="avatar" accept="image/*" filepond-image name="avatar")
       .inner-group.inner-two-col
-        label(class="inner-label" for="description") Mô tả
+        label(class="inner-label" for="description") #{detailedCategory.description}
         textarea(id="description" textarea-mce name="description")
       .inner-button.inner-two-col
         button Cập nhật
