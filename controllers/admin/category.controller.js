@@ -3,6 +3,7 @@ const { AccountAdmin } = require("../../models/accounts-admin.model");
 const categoryHelper = require("../../helpers/category.helper");
 const moment = require("moment");
 const slugify = require("slugify");
+
 module.exports.list = async (req, res) => {
   const queries = req.query;
   const find = { deleted: false };
@@ -24,13 +25,28 @@ module.exports.list = async (req, res) => {
       find.createdAt.$lte = moment(queries.endDate).toDate();
     }
   }
+  
   if (queries.keyword) {
     const keyword = slugify(queries.keyword);
     const keywordRegex = new RegExp(keyword, "i");
     find.slug = keywordRegex;
   }
 
-  const categoryList = await Category.find(find);
+  const limitedItems = 2;
+  let page = 1;
+  if (queries.page && queries.page > 0) {
+    page = parseInt(queries.page);
+  }
+  const skip = (page - 1) * limitedItems;
+  const totalRecord = await Category.countDocuments(find);
+  const totalPage = Math.ceil(totalRecord / limitedItems);
+  const pagination = {
+    totalRecord: totalRecord,
+    totalPage: totalPage,
+    skip: skip,
+  };
+
+  const categoryList = await Category.find(find).limit(limitedItems).skip(skip);
   for (const item of categoryList) {
     if (item.createdBy) {
       const infoAdmin = await AccountAdmin.findOne({
@@ -56,6 +72,7 @@ module.exports.list = async (req, res) => {
     pageTitle: "Quản lí danh mục",
     categoryList: categoryList,
     userAdmin: userAdmin,
+    pagination: pagination,
   });
 };
 

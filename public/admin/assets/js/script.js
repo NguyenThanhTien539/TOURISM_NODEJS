@@ -332,29 +332,159 @@ if (tourCreateForm) {
       });
       // End schedules
 
-      console.log(name);
-      console.log(category);
-      console.log(position);
-      console.log(status);
-      console.log(avatar);
-      console.log(priceAdult);
-      console.log(priceChildren);
-      console.log(priceBaby);
-      console.log(priceNewAdult);
-      console.log(priceNewChildren);
-      console.log(priceNewBaby);
-      console.log(stockAdult);
-      console.log(stockChildren);
-      console.log(stockBaby);
-      console.log(locations);
-      console.log(time);
-      console.log(vehicle);
-      console.log(departureDate);
-      console.log(information);
-      console.log(schedules);
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("category", category);
+      formData.append("position", position);
+      formData.append("status", status);
+      formData.append("avatar", avatar);
+      formData.append("priceAdult", priceAdult);
+      formData.append("priceChildren", priceChildren);
+      formData.append("priceBaby", priceBaby);
+      formData.append("priceNewAdult", priceNewAdult);
+      formData.append("priceNewChildren", priceNewChildren);
+      formData.append("priceNewBaby", priceNewBaby);
+      formData.append("stockAdult", stockAdult);
+      formData.append("stockChildren", stockChildren);
+      formData.append("stockBaby", stockBaby);
+      formData.append("locations", JSON.stringify(locations));
+      formData.append("time", time);
+      formData.append("vehicle", vehicle);
+      formData.append("departureDate", departureDate);
+      formData.append("information", information);
+      formData.append("schedules", JSON.stringify(schedules));
+
+      fetch(`/${pathAdmin}/tour/create`, {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+            // notify.success(data.message);
+          } else {
+            notify.error(data.message);
+          }
+        });
     });
 }
 // End Tour Create Form
+
+// Tour Edit Form
+const tourEditForm = document.querySelector("#tour-edit-form");
+if (tourEditForm) {
+  const validation = new JustValidate("#tour-edit-form");
+
+  validation
+    .addField("#name", [
+      {
+        rule: "required",
+        errorMessage: "Vui lòng nhập tên tour!",
+      },
+    ])
+    .onSuccess((event) => {
+      const id = event.target.id.value;
+      const name = event.target.name.value;
+      const category = event.target.category.value;
+      const position = event.target.position.value;
+      const status = event.target.status.value;
+      const avatars = filePond.avatar.getFiles();
+      let avatar = null;
+      if (avatars.length > 0) {
+        avatar = avatars[0].file;
+
+        const elementImageDefault =
+          event.target.avatar.closest("[image-default]");
+
+        const imageDefault = elementImageDefault.getAttribute("image-default");
+        if (imageDefault.includes(avatar.name)) {
+          avatar = undefined;
+        }
+      }
+      const priceAdult = event.target.priceAdult.value;
+      const priceChildren = event.target.priceChildren.value;
+      const priceBaby = event.target.priceBaby.value;
+      const priceNewAdult = event.target.priceNewAdult.value;
+      const priceNewChildren = event.target.priceNewChildren.value;
+      const priceNewBaby = event.target.priceNewBaby.value;
+      const stockAdult = event.target.stockAdult.value;
+      const stockChildren = event.target.stockChildren.value;
+      const stockBaby = event.target.stockBaby.value;
+      const locations = [];
+      const time = event.target.time.value;
+      const vehicle = event.target.vehicle.value;
+      const departureDate = event.target.departureDate.value;
+      const information = tinymce.get("information").getContent();
+      const schedules = [];
+
+      // locations
+      const listElementLocation = tourEditForm.querySelectorAll(
+        'input[name="locations"]:checked'
+      );
+      listElementLocation.forEach((input) => {
+        locations.push(input.value);
+      });
+      // End locations
+
+      // schedules
+      const listElementScheduleItem = tourEditForm.querySelectorAll(
+        ".inner-schedule-item"
+      );
+      listElementScheduleItem.forEach((scheduleItem) => {
+        const input = scheduleItem.querySelector("input");
+        const title = input.value;
+
+        const textarea = scheduleItem.querySelector("textarea");
+        const idTextarea = textarea.id;
+        const description = tinymce.get(idTextarea).getContent();
+
+        schedules.push({
+          title: title,
+          description: description,
+        });
+      });
+      // End schedules
+
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("category", category);
+      formData.append("position", position);
+      formData.append("status", status);
+      formData.append("avatar", avatar);
+      formData.append("priceAdult", priceAdult);
+      formData.append("priceChildren", priceChildren);
+      formData.append("priceBaby", priceBaby);
+      formData.append("priceNewAdult", priceNewAdult);
+      formData.append("priceNewChildren", priceNewChildren);
+      formData.append("priceNewBaby", priceNewBaby);
+      formData.append("stockAdult", stockAdult);
+      formData.append("stockChildren", stockChildren);
+      formData.append("stockBaby", stockBaby);
+      formData.append("locations", JSON.stringify(locations));
+      formData.append("time", time);
+      formData.append("vehicle", vehicle);
+      formData.append("departureDate", departureDate);
+      formData.append("information", information);
+      formData.append("schedules", JSON.stringify(schedules));
+
+      fetch(`/${pathAdmin}/tour/edit/${id}`, {
+        method: "PATCH",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
+    });
+}
+// End Tour Edit Form
 
 // Order Edit Form
 const orderEditForm = document.querySelector("#order-edit-form");
@@ -443,12 +573,27 @@ if (settingWebsiteInfoForm) {
         favicon = favicons[0].file;
       }
 
-      console.log(websiteName);
-      console.log(phone);
-      console.log(email);
-      console.log(address);
-      console.log(logo);
-      console.log(favicon);
+      const formData = new FormData();
+      formData.append("websiteName", websiteName);
+      formData.append("phone", phone);
+      formData.append("email", email);
+      formData.append("address", address);
+      formData.append("logo", logo);
+      formData.append("favicon", favicon);
+
+      fetch(`/${pathAdmin}/setting/website-info`, {
+        method: "PATCH",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
     });
 }
 // End Setting Website Info Form
@@ -544,6 +689,30 @@ if (settingAccountAdminCreateForm) {
         avatar = avatars[0].file;
       }
 
+      const formData = new FormData();
+      formData.append("fullName", fullName);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("role", role);
+      formData.append("positionCompany", positionCompany);
+      formData.append("status", status);
+      formData.append("password", password);
+      formData.append("avatar", avatar);
+
+      fetch(`/${pathAdmin}/setting/account-admin/create`, {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
+
       console.log(fullName);
       console.log(email);
       console.log(phone);
@@ -584,12 +753,87 @@ if (settingRoleCreateForm) {
       });
       // End permissions
 
+      const dataFinal = {
+        name: name,
+        description: description,
+        permissions: permissions,
+      };
+
+      fetch(`/${pathAdmin}/setting/role/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataFinal),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.href = `/${pathAdmin}/setting/role/create`;
+          } else {
+            notify.error(data.message);
+          }
+        });
       console.log(name);
       console.log(description);
       console.log(permissions);
     });
 }
 // End Setting Role Create Form
+
+// Setting Role Edit Form
+const settingRoleEditForm = document.querySelector("#setting-role-edit-form");
+if (settingRoleEditForm) {
+  const validation = new JustValidate("#setting-role-edit-form");
+
+  validation
+    .addField("#name", [
+      {
+        rule: "required",
+        errorMessage: "Vui lòng nhập tên nhóm quyền!",
+      },
+    ])
+    .onSuccess((event) => {
+      const id = event.target.id.value;
+      const name = event.target.name.value;
+      const description = event.target.description.value;
+      const permissions = [];
+
+      // permissions
+      const listElementPermission = settingRoleEditForm.querySelectorAll(
+        'input[name="permissions"]:checked'
+      );
+      listElementPermission.forEach((input) => {
+        permissions.push(input.value);
+      });
+      // End permissions
+
+      const dataFinal = {
+        name: name,
+        description: description,
+        permissions: permissions,
+      };
+
+      fetch(`/${pathAdmin}/setting/role/edit/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataFinal),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
+    });
+}
+// End Setting Role Edit Form
 
 // Profile Edit Form
 const profileEditForm = document.querySelector("#profile-edit-form");
@@ -705,7 +949,6 @@ if (profileChangePasswordForm) {
     });
 }
 // End Profile Change Password Form
-
 const sider = document.querySelector(".sider");
 if (sider) {
   const menuList = sider.querySelectorAll("a");
@@ -754,6 +997,62 @@ if (listButtonDelete) {
             notify.error(data.message);
           }
         });
+    });
+  });
+}
+
+const listUndoDelete = document.querySelectorAll("[button-undo]");
+if (listUndoDelete) {
+  listUndoDelete.forEach((button) => {
+    button.addEventListener("click", () => {
+      const dataApi = button.getAttribute("data-api");
+      console.log(dataApi);
+      fetch(dataApi, {
+        method: "PATCH",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
+    });
+  });
+}
+
+const listDestroyDelete = document.querySelectorAll("[button-destroy]");
+if (listDestroyDelete) {
+  listDestroyDelete.forEach((button) => {
+    button.addEventListener("click", () => {
+      Swal.fire({
+        title: "Bạn có chắc muốn xóa bản ghi này?",
+        text: "Hành động này sẽ không được khôi phục được",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Vẫn xóa",
+        cancelButtonText: "Không xóa",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const dataApi = button.getAttribute("data-api");
+          fetch(dataApi, {
+            method: "DELETE",
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.code == "success") {
+                setNotificationInSession(data.code, data.message);
+                window.location.reload();
+              } else {
+                notify.error(data.message);
+              }
+            });
+        }
+      });
     });
   });
 }
@@ -880,7 +1179,6 @@ if (changeMulti) {
       const listInputChecked = document.querySelectorAll(
         "[check-item]:checked"
       );
-
       if (option && listInputChecked.length > 0) {
         const ids = [];
         listInputChecked.forEach((input) => {
@@ -893,26 +1191,57 @@ if (changeMulti) {
           ids: ids,
         };
 
-        fetch(api, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(dataFinal),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.code == "success") {
-              setNotificationInSession(data.code, data.message);
-              window.location.reload();
+        if (option == "destroy") {
+          Swal.fire({
+            title: "Bạn có chắc muốn xóa bản ghi này?",
+            text: "Hành động này sẽ không được khôi phục được",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Vẫn xóa",
+            cancelButtonText: "Không xóa",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch(api, {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(dataFinal),
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.code == "success") {
+                    setNotificationInSession(data.code, data.message);
+                    window.location.reload();
+                  }
+                });
             }
           });
+        } else {
+          fetch(api, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(dataFinal),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.code == "success") {
+                setNotificationInSession(data.code, data.message);
+                window.location.reload();
+              }
+            });
+        }
       }
     });
   }
 }
 //end change multi
 
+//Tìm kiếm theo thông tin
 const search = document.querySelector("[search]");
 if (search) {
   const url = new URL(window.location.href);
@@ -931,5 +1260,26 @@ if (search) {
   const value = url.searchParams.get("keyword");
   if (value) {
     search.value = value;
+  }
+}
+//Kết thúc kiếm theo thông tin
+
+const boxPagination = document.querySelector("[box-pagination]");
+if (boxPagination) {
+  const url = new URL(window.location.href);
+
+  boxPagination.addEventListener("change", () => {
+    const value = boxPagination.value;
+    if (value) {
+      url.searchParams.set("page", value);
+    } else {
+      url.searchParams.delete("page");
+    }
+    window.location.href = url.href;
+  });
+
+  const value = url.searchParams.get("page");
+  if (value) {
+    boxPagination.value = value;
   }
 }
