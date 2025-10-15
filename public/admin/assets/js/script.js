@@ -725,6 +725,109 @@ if (settingAccountAdminCreateForm) {
 }
 // End Setting Account Admin Create Form
 
+// Setting Account Admin Edit Form
+const settingAccountAdminEditForm = document.querySelector(
+  "#setting-account-admin-edit-form"
+);
+if (settingAccountAdminEditForm) {
+  const validation = new JustValidate("#setting-account-admin-edit-form");
+
+  validation
+    .addField("#fullName", [
+      {
+        rule: "required",
+        errorMessage: "Vui lòng nhập họ tên!",
+      },
+      {
+        rule: "minLength",
+        value: 5,
+        errorMessage: "Họ tên phải có ít nhất 5 ký tự!",
+      },
+      {
+        rule: "maxLength",
+        value: 50,
+        errorMessage: "Họ tên không được vượt quá 50 ký tự!",
+      },
+    ])
+    .addField("#email", [
+      {
+        rule: "required",
+        errorMessage: "Vui lòng nhập email!",
+      },
+      {
+        rule: "email",
+        errorMessage: "Email không đúng định dạng!",
+      },
+    ])
+    .addField("#phone", [
+      {
+        rule: "required",
+        errorMessage: "Vui lòng nhập số điện thoại!",
+      },
+      {
+        rule: "customRegexp",
+        value: /(84|0[3|5|7|8|9])+([0-9]{8})\b/g,
+        errorMessage: "Số điện thoại không đúng định dạng!",
+      },
+    ])
+    .addField("#positionCompany", [
+      {
+        rule: "required",
+        errorMessage: "Vui lòng nhập chức vụ!",
+      },
+    ])
+    .onSuccess((event) => {
+      const id = event.target.id.value;
+      const fullName = event.target.fullName.value;
+      const email = event.target.email.value;
+      const phone = event.target.phone.value;
+      const role = event.target.role.value;
+      const positionCompany = event.target.positionCompany.value;
+      const status = event.target.status.value;
+      const password = event.target.password.value;
+      const avatars = filePond.avatar.getFiles();
+      let avatar = null;
+      if (avatars.length > 0) {
+        avatar = avatars[0].file;
+        const elementImageDefault =
+          event.target.avatar.closest("[image-default]");
+
+        if (elementImageDefault) {
+          const imageDefault =
+            elementImageDefault.getAttribute("image-default");
+          if (imageDefault.includes(avatar.name)) {
+            avatar = undefined;
+          }
+        }
+      }
+
+      const formData = new FormData();
+      formData.append("fullName", fullName);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("role", role);
+      formData.append("positionCompany", positionCompany);
+      formData.append("status", status);
+      formData.append("password", password);
+      formData.append("avatar", avatar);
+
+      fetch(`/${pathAdmin}/setting/account-admin/edit/${id}`, {
+        method: "PATCH",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
+    });
+}
+// End Setting Account Admin Edit Form
+
 // Setting Role Create Form
 const settingRoleCreateForm = document.querySelector(
   "#setting-role-create-form"
@@ -886,8 +989,37 @@ if (profileEditForm) {
       let avatar = null;
       if (avatars.length > 0) {
         avatar = avatars[0].file;
+        const elementImageDefault =
+          event.target.avatar.closest("[image-default]");
+
+        if (elementImageDefault) {
+          const imageDefault =
+            elementImageDefault.getAttribute("image-default");
+          if (imageDefault.includes(avatar.name)) {
+            avatar = undefined;
+          }
+        }
       }
 
+      const formData = new FormData();
+      formData.append("fullName", fullName);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("avatar", avatar);
+
+      fetch(`/${pathAdmin}/profile/edit`, {
+        method: "PATCH",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
       console.log(fullName);
       console.log(email);
       console.log(phone);
@@ -945,7 +1077,27 @@ if (profileChangePasswordForm) {
     ])
     .onSuccess((event) => {
       const password = event.target.password.value;
-      console.log(password);
+
+      const dataFinal = {
+        password: password,
+      };
+
+      fetch(`/${pathAdmin}/profile/change-password`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataFinal),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.href = `/${pathAdmin}/profile/edit`;
+          } else {
+            notify.error(data.message);
+          }
+        });
     });
 }
 // End Profile Change Password Form
@@ -1283,3 +1435,41 @@ if (boxPagination) {
     boxPagination.value = value;
   }
 }
+
+// Edit Tour Section Form
+const tourSectionForm = document.querySelector("#setting-edit-tour-section");
+if (tourSectionForm) {
+  const validation = new JustValidate("#setting-edit-tour-section");
+
+  validation
+    .addField("#tourSection4", [
+      {
+        rule: "required",
+        errorMessage: "Vui lòng nhập tên danh mục!",
+      },
+    ])
+    .onSuccess((event) => {
+      const tourSection4 = event.target.tourSection4.value;
+      const tourSection6 = event.target.tourSection6.value;
+
+      dataFinal = { tourSection4: tourSection4, tourSection6: tourSection6 };
+
+      fetch(`/${pathAdmin}/setting/tour/section`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataFinal),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "success") {
+            setNotificationInSession(data.code, data.message);
+            window.location.reload();
+          } else {
+            notify.error(data.message);
+          }
+        });
+    });
+}
+// End Edit Tour Section Form

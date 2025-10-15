@@ -23,6 +23,14 @@ route.get("/account-admin/list", settingController.accountAdminList);
 
 route.get("/account-admin/create", settingController.accountAdminCreate);
 
+route.get("/account-admin/edit/:id", settingController.accountAdminEdit);
+
+route.patch(
+  "/account-admin/edit/:id",
+  upload.single("avatar"),
+  settingController.accountAdminEditPatch
+);
+
 route.post(
   "/account-admin/create",
   upload.single("avatar"),
@@ -40,6 +48,9 @@ route.post(
 );
 
 route.get("/role/edit/:id", settingController.roleEdit);
+
+route.get("/tour/section", settingController.tourSection);
+route.post("/tour/section", settingController.tourSectionPost);
 
 route.patch(
   "/role/edit/:id",

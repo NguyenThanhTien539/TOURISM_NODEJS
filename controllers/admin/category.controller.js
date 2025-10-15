@@ -32,7 +32,7 @@ module.exports.list = async (req, res) => {
     find.slug = keywordRegex;
   }
 
-  const limitedItems = 2;
+  const limitedItems = 5;
   let page = 1;
   if (queries.page && queries.page > 0) {
     page = parseInt(queries.page);

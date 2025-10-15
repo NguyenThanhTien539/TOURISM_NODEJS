@@ -36,8 +36,8 @@ module.exports.loginPost = async (req, res) => {
     });
     return;
   }
-
-  if (!(existAccount.active != "active")) {
+  console.log(existAccount.status);
+  if (existAccount.status != "active") {
     res.json({
       code: "error",
       message: "Tài khoản chưa được kích hoạt",
@@ -228,7 +228,10 @@ module.exports.resetPasswordPost = async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const newPassword = await bcrypt.hash(password, salt);
 
-  await AccountAdmin.updateOne({ _id: req.account.id }, { password: newPassword });
+  await AccountAdmin.updateOne(
+    { _id: req.account.id },
+    { password: newPassword }
+  );
 
   res.json({
     code: "success",

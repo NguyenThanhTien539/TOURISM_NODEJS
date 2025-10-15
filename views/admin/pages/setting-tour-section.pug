@@ -1,0 +1,19 @@
+extends ../layouts/default.pug
+include ../mixins/options.pug
+
+block main
+  h1.box-title Chỉnh sửa tour section
+  .section-8
+    form#setting-edit-tour-section
+      .inner-group
+        label(class="inner-label" for="tourSection4") Section 4
+        select(id="tourSection4" name="tourSection4")
+          option(value="") -- Chọn danh mục --
+          +options(categoryList, 0, tourSection4)
+      .inner-group
+        label(class="inner-label" for="tourSection6") Section 6
+        select(id="tourSection6" name="tourSection6")
+          option(value="") -- Chọn danh mục --
+          +options(categoryList, 0, tourSection6)
+      .inner-button.inner-two-col
+        button Cập nhật

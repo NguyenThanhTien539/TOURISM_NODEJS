@@ -2,12 +2,13 @@ mixin box_breadcrumb()
   .box-breadcrumb
     .inner-image
       img(
-        alt="" 
-        src="/assets/images/banner-6.jpg"
+        alt=detailedCategory.name
+        src=detailedCategory.avatar
         )
     .inner-content
       .container
-        h1.inner-title Tour Nước Ngoài
+        h1.inner-title #{detailedCategory.name}
         .inner-list
-          a(href="#") Trang Chủ
-          a(href="#") Tour Nước Ngoài
+          a(href="/") Trang Chủ
+          each item in breadcrumbList
+            a(href=`/category/${item.slug}`) #{item.name}

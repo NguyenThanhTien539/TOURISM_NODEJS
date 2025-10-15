@@ -2,7 +2,7 @@ extends ../layouts/default.pug
 include ../mixins/options.pug
 
 block main
-  h1.box-title Tạo danh mục
+  h1.box-title Chỉnh sửa danh mục
 
   .section-8
     form#category-edit-form
@@ -30,8 +30,8 @@ block main
         div(class="inner-upload-image" image-default= detailedCategory.avatar)
           input(type="file" id="avatar" accept="image/*" filepond-image name="avatar")
       .inner-group.inner-two-col
-        label(class="inner-label" for="description") #{detailedCategory.description}
-        textarea(id="description" textarea-mce name="description")
+        label(class="inner-label" for="description") 
+        textarea(id="description" textarea-mce name="description") #{detailedCategory.description}
       .inner-button.inner-two-col
         button Cập nhật
     .inner-back

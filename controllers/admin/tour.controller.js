@@ -315,6 +315,13 @@ module.exports.changeMultiPatch = async (req, res) => {
 };
 
 module.exports.createPost = async (req, res) => {
+  if (!req.permissions.includes("tour-create")) {
+    res.json({
+      code: "error",
+      message: "Không có quyền",
+    });
+    return;
+  }
   const totalRecord = await Tour.countDocuments({});
 
   req.body.avatar = req.file ? req.file.path : "";

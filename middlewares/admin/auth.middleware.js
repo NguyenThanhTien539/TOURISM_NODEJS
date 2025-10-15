@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { AccountAdmin } = require("../../models/accounts-admin.model");
+const { Role } = require("../../models/role.model");
 
 module.exports.verifyToken = async (req, res, next) => {
   const token = req.cookies.token;
@@ -24,10 +25,21 @@ module.exports.verifyToken = async (req, res, next) => {
       return;
     }
 
+    if (existAccount.role) {
+      const detailedRole = await Role.findOne({
+        _id: existAccount.role,
+        deleted: false,
+      });
+      if (detailedRole) {
+        existAccount.roleName = detailedRole.name;
+        res.locals.permissions = detailedRole.permissions;
+        req.permissions = detailedRole.permissions;
+      }
+    }
+
     req.account = existAccount;
 
     res.locals.account = existAccount;
-
     next();
   } catch (error) {
     res.clearCookie(token);

@@ -1,8 +1,12 @@
 const { WebsiteInfo } = require("../../models/setting-website-info.model");
 const { permissionList, pathAdmin } = require("../../config/variable.config");
 const { Role } = require("../../models/role.model");
+const { Category } = require("../../models/category.model");
 const { AccountAdmin } = require("../../models/accounts-admin.model");
+const categoryHelper = require("../../helpers/category.helper");
+
 const bcrypt = require("bcryptjs");
+const { TourSections } = require("../../models/tour.section.model");
 
 module.exports.list = (req, res) => {
   res.render("admin/pages/setting-list.pug", {
@@ -42,9 +46,21 @@ module.exports.websiteInfoPatch = async (req, res) => {
   });
 };
 
-module.exports.accountAdminList = (req, res) => {
+module.exports.accountAdminList = async (req, res) => {
+  const accountAdminList = await AccountAdmin.find({ deleted: false });
+
+  if (accountAdminList) {
+    for (const item of accountAdminList) {
+      if (item.role) {
+        const roleInfo = await Role.findOne({ _id: item.role });
+        if (roleInfo) item.roleName = roleInfo.name;
+      }
+    }
+  }
+
   res.render("admin/pages/setting-account-admin-list.pug", {
     pageTitle: "Tài khoản quản trị",
+    accountAdminList: accountAdminList,
   });
 };
 
@@ -73,19 +89,87 @@ module.exports.accountAdminCreatePost = async (req, res) => {
 
   req.body.createdBy = req.account.id;
   req.body.updatedBy = req.account.id;
-  req.avatar = req.file ? req.file.path : "";
+  req.body.avatar = req.file ? req.file.path : "";
 
   const salt = await bcrypt.genSalt(10);
   req.body.password = await bcrypt.hash(req.body.password, salt);
 
-  console.log(req.body);
-  // const newRecord = new AccountAdmin(req.body);
-  // await newRecord.save();
+  const newRecord = new AccountAdmin(req.body);
+  await newRecord.save();
 
   res.json({
     code: "success",
     message: "Tạo thành công",
   });
+};
+
+module.exports.accountAdminEdit = async (req, res) => {
+  // console.log("haha");
+  try {
+    const { id } = req.params;
+    const detailedAccountAdmin = await AccountAdmin.findOne({
+      _id: id,
+      deleted: false,
+    });
+
+    const roleList = await Role.find({
+      deleted: false,
+    });
+
+    res.render(`admin/pages/setting-account-admin-edit.pug`, {
+      pageTitle: "Chỉnh sửa trang tài khoản quản trị",
+      detailedAccountAdmin: detailedAccountAdmin,
+      roleList: roleList,
+    });
+  } catch (error) {
+    res.redirect(`/${pathAdmin}/setting/account-admin/list`);
+  }
+};
+
+module.exports.accountAdminEditPatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const existEmail = await AccountAdmin.findOne({
+      _id: { $ne: id },
+      email: req.body.email,
+    });
+
+    if (existEmail) {
+      res.json({
+        code: "error",
+        message: "Tồn tại email trong hệ thống",
+      });
+      return;
+    }
+
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      req.body.password = await bcrypt.hash(req.body.password, salt);
+    } else {
+      delete req.body.password;
+    }
+
+    if (req.file) {
+      req.body.avatar = req.file.path;
+    } else {
+      delete req.body.avatar;
+    }
+
+    req.body.updatedBy = req.account.id;
+
+    await AccountAdmin.updateOne({ _id: id, deleted: false }, req.body);
+
+    res.json({
+      code: "success",
+      message: "Cập nhật thành công",
+    });
+  } catch (error) {
+    res.json({
+      code: "error",
+      message: "Lỗi bảng ghi",
+    });
+  }
 };
 
 module.exports.roleList = async (req, res) => {
@@ -194,4 +278,29 @@ module.exports.roleDeletePatch = async (req, res) => {
       message: "Dữ liệu không hợp lệ",
     });
   }
+};
+
+module.exports.tourSection = async (req, res) => {
+  const tourSections = await TourSections.findOne({});
+  const categoryList = await Category.find({ deleted: false });
+  const categoryTree = categoryHelper.buildTree(categoryList, "");
+  res.render("admin/pages/setting-tour-section.pug", {
+    pageTitle: "Cài đặt chung",
+    categoryList: categoryTree,
+    tourSection4: tourSections.tourSection4,
+    tourSection6: tourSections.tourSection6,
+  });
+};
+
+module.exports.tourSectionPost = async (req, res) => {
+  const existRecord = await TourSections.findOne({});
+  if (existRecord) {
+    console.log(existRecord.id);
+    await TourSections.updateOne({ _id: existRecord.id }, req.body);
+  } else {
+    const newRecord = new TourSections(req.body);
+    await newRecord.save();
+  }
+
+  res.json({ code: "success", message: "Thành công" });
 };

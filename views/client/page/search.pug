@@ -1,13 +1,7 @@
 extends ../layouts/default.pug
 include ../mixins/products.pug
-include ../mixins/box-breadcrumb.pug
 
 block main
-  // Breadcrumb
-  +box_breadcrumb()
-  // End Breadcrumb
-
-
   // Section 9
   .section-9
     .container
@@ -73,9 +67,7 @@ block main
           // End Box Filter
         .inner-right
           .inner-info
-            h2.inner-title #{detailedCategory.name}
-            .inner-desc
-              | !{detailedCategory.description}
+            h2.inner-title #{pageTitle}
           .inner-info-2
             .inner-sort
               .inner-label Sắp xếp:
@@ -100,7 +92,7 @@ block main
               i.fa-solid.fa-filter
           .inner-list-tour
             // Product Item
-            each item in tourListByCategory
+            each item in filterTourList
               +product_item(item)
             // End Product Item
      
